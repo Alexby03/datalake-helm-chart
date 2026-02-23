@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "datalake.fullname" . }}-historyserver
+  labels:
+    app.kubernetes.io/component: hadoop-historyserver
+spec:
+  serviceName: {{ include "datalake.fullname" . }}-historyserver  # References your existing service
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: hadoop-historyserver
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: hadoop-historyserver
+    spec:
+      initContainers:
+      - name: init-history-dir
+        image: "{{ .Values.hadoop.historyserver.image.repository }}:{{ .Values.hadoop.historyserver.image.tag }}"
+        command: ["/bin/bash", "-c"]
+        args:
+        - |
+          mkdir -p /hadoop/yarn/timeline
+          chown -R historyserver:hadoop /hadoop/yarn/timeline
+        volumeMounts:
+        - name: hadoop-config
+          mountPath: /etc/hadoop
+        - name: historyserver-data
+          mountPath: /hadoop/yarn/timeline
+      containers:
+      - name: historyserver
+        image: "{{ .Values.hadoop.historyserver.image.repository }}:{{ .Values.hadoop.historyserver.image.tag }}"
+        imagePullPolicy: {{ .Values.hadoop.historyserver.image.pullPolicy }}
+        env:
+        {{- range $key, $value := .Values.hadoop.env }}
+        - name: {{ $key }}
+          value: "{{ $value }}"
+        {{- end }}
+        - name: CLUSTER_NAME
+          value: "{{ .Values.hadoop.historyserver.clusterName }}"
+        - name: HADOOP_OPTS
+          value: "--add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.invoke=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED"
+        ports:
+        - name: api
+          containerPort: {{ .Values.hadoop.historyserver.ports.api }}
+        - name: web
+          containerPort: {{ .Values.hadoop.historyserver.ports.web }}
+        volumeMounts:
+        - name: hadoop-config
+          mountPath: /etc/hadoop
+        - name: historyserver-data
+          mountPath: /hadoop/yarn/timeline
+      volumes:
+      - name: hadoop-config
+        configMap:
+          name: {{ include "datalake.fullname" . }}-hadoop-config
+  volumeClaimTemplates:
+  - metadata:
+      name: historyserver-data
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: "{{ .Values.hadoop.historyserver.storageSize | default "2Gi" }}"
+      storageClassName: {{ .Values.global.storageClass | quote }}

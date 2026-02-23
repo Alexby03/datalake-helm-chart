@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "datalake.fullname" . }}-trino-worker
+  labels:
+    app.kubernetes.io/component: trino-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: trino-worker
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: trino-worker
+    spec:
+      containers:
+      - name: trino
+        image: "{{ .Values.trino.worker.image.repository }}:{{ .Values.trino.worker.image.tag }}"
+        imagePullPolicy: {{ .Values.trino.worker.image.pullPolicy }}
+        ports:
+        - name: http
+          containerPort: {{ .Values.trino.worker.ports.http }}
+        volumeMounts:
+        - name: trino-config
+          mountPath: /etc/trino
+        - name: hadoop-config
+          mountPath: /etc/hadoop
+      volumes:
+      - name: trino-config
+        configMap:
+          name: {{ include "datalake.fullname" . }}-trino-catalog
+      - name: hadoop-config
+        configMap:
+          name: {{ include "datalake.fullname" . }}-hadoop-config

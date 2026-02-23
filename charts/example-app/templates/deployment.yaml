@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "helper-func-example.fullname" . }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "helper-func-example.name" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "helper-func-example.name" . }}
+    spec:
+      containers:
+        - name: nginx
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: html-volume
+              mountPath: /usr/share/nginx/html
+      volumes:
+        - name: html-volume
+          configMap:
+            name: {{ include "helper-func-example.fullname" . }}-html
+

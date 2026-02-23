@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "datalake.fullname" . }}-datanode
+  labels:
+    app.kubernetes.io/component: hadoop-datanode
+spec:
+  serviceName: {{ include "datalake.fullname" . }}-datanode
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: hadoop-datanode
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: hadoop-datanode
+    spec:
+      containers:
+      - name: datanode
+        image: "{{ .Values.hadoop.datanode1.image.repository }}:{{ .Values.hadoop.datanode1.image.tag }}"
+        imagePullPolicy: {{ .Values.hadoop.datanode1.image.pullPolicy }}
+        env:
+        {{- range $key, $value := .Values.hadoop.env }}
+        - name: {{ $key }}
+          value: "{{ $value }}"
+        {{- end }}
+        - name: CLUSTER_NAME
+          value: "{{ .Values.hadoop.datanode1.clusterName }}"
+        ports:
+        - name: web
+          containerPort: {{ .Values.hadoop.datanode1.ports.web }}
+        - name: ipc
+          containerPort: {{ .Values.hadoop.datanode1.ports.ipc }}
+        - name: http
+          containerPort: {{ .Values.hadoop.datanode1.ports.http }}
+        volumeMounts:
+        - name: hadoop-config
+          mountPath: /etc/hadoop
+        - name: datanode-data
+          mountPath: /hadoop/dfs/data
+      volumes:
+      - name: hadoop-config
+        configMap:
+          name: {{ include "datalake.fullname" . }}-hadoop-config
+  volumeClaimTemplates:
+  - metadata:
+      name: datanode-data
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: {{ .Values.hadoop.datanode1.storageSize }}
+      storageClassName: {{ .Values.global.storageClass | default "standard" }}
+  

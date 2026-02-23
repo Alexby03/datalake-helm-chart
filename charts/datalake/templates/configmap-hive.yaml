@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "datalake.fullname" . }}-hive-config
+  labels:
+    app.kubernetes.io/component: hive-config
+data:
+  hive-site.xml: |
+{{ .Files.Get "files/conf/hive/hive-site.xml" | indent 4 }}

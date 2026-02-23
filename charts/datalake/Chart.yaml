@@ -1,0 +1,21 @@
+annotations:
+  artifacthub.io/changes: |-
+    - kind: added
+      description: Initial datalake helm chart
+  category: big-data
+apiVersion: v2
+appVersion: datalake_helm_v1
+description: Hadoop/Hudi/Hive/Spark/Trino datalake stack
+keywords:
+- hadoop
+- hudi
+- hive
+- spark
+- trino
+kubeVersion: '>=1.27.0-0'
+maintainers:
+- email: cbhcloud@kth.se
+  name: Grupp S
+name: datalake
+type: application
+version: 1.0.0

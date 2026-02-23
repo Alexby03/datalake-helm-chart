@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "datalake.fullname" . }}-hivemetastore
+  labels:
+    app.kubernetes.io/component: hive-metastore
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: hive-metastore
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: hive-metastore
+    spec:
+      containers:
+      - name: hivemetastore
+        image: "{{ .Values.hive.metastore.image }}:{{ .Values.hive.metastore.tag }}"
+        imagePullPolicy: {{ .Values.hive.metastore.imagePullPolicy | default "IfNotPresent" }}
+        command: ["/opt/hive/bin/hive", "--service", "metastore"]
+        env:
+        {{- range $key, $value := .Values.hadoop.env }}
+        - name: {{ $key }}
+          value: "{{ $value }}"
+        {{- end }}
+        ports:
+        - name: thrift
+          containerPort: {{ .Values.hive.metastore.port }}
+        volumeMounts:
+        - name: hive-config
+          mountPath: /opt/hive/conf/hive-site.xml
+          subPath: hive-site.xml
+        - name: hadoop-config
+          mountPath: /etc/hadoop
+      volumes:
+      - name: hive-config
+        configMap:
+          name: {{ include "datalake.fullname" . }}-hive-config
+      - name: hadoop-config
+        configMap:
+          name: {{ include "datalake.fullname" . }}-hadoop-config

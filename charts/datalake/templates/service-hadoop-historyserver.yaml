@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "datalake.fullname" . }}-historyserver
+  labels:
+    app.kubernetes.io/component: hadoop-historyserver
+spec:
+  type: ClusterIP
+  ports:
+    - name: api
+      port: {{ .Values.hadoop.historyserver.ports.api }}
+      targetPort: api
+    - name: web
+      port: {{ .Values.hadoop.historyserver.ports.web }}
+      targetPort: web
+  selector:
+    app.kubernetes.io/component: hadoop-historyserver

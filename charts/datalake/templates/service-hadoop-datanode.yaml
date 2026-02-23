@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "datalake.fullname" . }}-datanode
+  labels:
+    app.kubernetes.io/component: hadoop-datanode
+spec:
+  type: ClusterIP
+  ports:
+    - name: web
+      port: {{ .Values.hadoop.datanode1.ports.web }}
+      targetPort: web
+    - name: ipc
+      port: {{ .Values.hadoop.datanode1.ports.ipc }}
+      targetPort: ipc
+    - name: http
+      port: {{ .Values.hadoop.datanode1.ports.http }}
+      targetPort: http
+  selector:
+    app.kubernetes.io/component: hadoop-datanode

@@ -1,0 +1,14 @@
+[tools]
+helm = "4.1"
+helmfile = "1.2"
+kubectl = "1.34"
+
+[tasks.lint-dev]
+description = "Lint helmfile for dev environment"
+run = "helmfile -e dev lint"
+
+[tasks.deploy-dev]
+depends = ["create-kind-cluster"]
+description = "Deploy helmfile to dev environment"
+run = "KUBECONFIG=.secrets/datalake-kubeconfig helmfile -e dev sync"
+

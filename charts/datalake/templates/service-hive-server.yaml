@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "datalake.fullname" . }}-hiveserver
+  labels:
+    app.kubernetes.io/component: hive-server
+spec:
+  type: ClusterIP
+  ports:
+    - name: hiveserver2
+      port: {{ .Values.hive.hiveserver.port }}
+      targetPort: hiveserver2
+  selector:
+    app.kubernetes.io/component: hive-server

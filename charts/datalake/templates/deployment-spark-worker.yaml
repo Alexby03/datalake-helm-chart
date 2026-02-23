@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "datalake.fullname" . }}-spark-worker
+  labels:
+    app.kubernetes.io/component: spark-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: spark-worker
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: spark-worker
+    spec:
+      containers:
+      - name: sparkworker
+        image: "{{ .Values.spark.worker1.image }}:{{ .Values.spark.worker1.tag }}"
+        imagePullPolicy: IfNotPresent
+        env:
+        {{- range $key, $value := .Values.hadoop.env }}
+        - name: {{ $key }}
+          value: "{{ $value }}"
+        {{- end }}
+        - name: INIT_DAEMON_STEP
+          value: "{{ .Values.spark.worker1.env.INIT_DAEMON_STEP }}"
+        - name: SPARK_LOCAL_IP
+          value: "{{ .Values.spark.worker1.env.SPARK_LOCAL_IP }}"
+        - name: SPARK_MASTER_URL
+          value: 'spark://{{ include "datalake.fullname" . }}-sparkmaster:{{ .Values.spark.master.ports.master }}'
+        ports:
+        - name: web
+          containerPort: {{ .Values.spark.worker1.ports.web }}
+        volumeMounts:
+        - name: hadoop-config
+          mountPath: /etc/hadoop
+        - name: hive-config
+          mountPath: /opt/hive/conf/hive-site.xml
+          subPath: hive-site.xml
+      volumes:
+      - name: hadoop-config
+        configMap:
+          name: {{ include "datalake.fullname" . }}-hadoop-config
+      - name: hive-config
+        configMap:
+          name: {{ include "datalake.fullname" . }}-hive-config

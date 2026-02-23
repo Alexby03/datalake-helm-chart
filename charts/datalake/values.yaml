@@ -1,0 +1,160 @@
+# Global
+global:
+  prefix: ""
+  storageClass: "standard"
+
+# Hadoop
+hadoop:
+  namenode:
+    name: "namenode"
+    image:
+      repository: "minkens/hudi-hadoop_3.3.6-namenode"
+      tag: "latest"
+      pullPolicy: IfNotPresent
+    ports:
+      ipc: 8020
+      client: 9000
+      web: 9870
+    storageSize: "50Gi"
+    clusterName: "hudi_minimal"
+    formatHdfs: true
+    
+  datanode1:
+    name: "datanode1"
+    image:
+      repository: "minkens/hudi-hadoop_3.3.6-datanode" 
+      tag: "latest"
+      pullPolicy: IfNotPresent
+    ports:
+      web: 9864
+      ipc: 50010
+      http: 50075
+    storageSize: "100Gi"
+    clusterName: "hudi_minimal"
+    
+  historyserver:
+    name: "historyserver"
+    image:
+      repository: "minkens/hudi-hadoop_3.3.6-history"
+      tag: "latest"
+      pullPolicy: IfNotPresent
+    ports:
+      api: 8188
+      web: 19888
+    storageSize: "20Gi"
+    clusterName: "hudi_hadoop336_hive420_spark353"
+
+  # Hadoop env
+  env:
+    CORE_CONF_fs_defaultFS: "hdfs://datalake-namenode:8020"
+    CORE_CONF_hadoop_http_staticuser_user: "root"
+    CORE_CONF_hadoop_proxyuser_hue_hosts: "*"
+    CORE_CONF_hadoop_proxyuser_hue_groups: "*"
+    HDFS_CONF_dfs_namenode_datanode_registration_ip___hostname___check: "false"
+    HDFS_CONF_dfs_webhdfs_enabled: "true"
+    HDFS_CONF_dfs_permissions_enabled: "false"
+    HDFS_CONF_dfs_replication: "1"
+    HIVE_SITE_CONF_javax_jdo_option_ConnectionURL: "jdbc:postgresql://datalake-hive-metastore-db:5432/metastore"
+    HIVE_SITE_CONF_javax_jdo_option_ConnectionDriverName: "org.postgresql.Driver"
+    HIVE_SITE_CONF_javax_jdo_option_ConnectionUserName: "hive"
+    HIVE_SITE_CONF_javax_jdo_option_ConnectionPassword: "hive"
+    HIVE_SITE_CONF_datanucleus_autoCreateSchema: "false"
+    HIVE_SITE_CONF_hive_metastore_uris: "thrift://datalake-hivemetastore:9083"
+    YARN_CONF_yarn_log___aggregation___enable: "true"
+    YARN_CONF_yarn_resourcemanager_hostname: "resourcemanager"
+    YARN_CONF_yarn_nodemanager_vmem___check___enabled: "false"
+    JAVA_HOME: "/usr/lib/jvm/java-21-openjdk-amd64"
+
+# Hive metastore
+hive:
+  metastoreDb:
+    name: "hive-metastore-db"
+    image: "bde2020/hive-metastore-postgresql:3.1.0"  
+    storageSize: "10Gi"
+    env:
+      POSTGRES_DB: "metastore"
+      POSTGRES_USER: "hive"
+      POSTGRES_PASSWORD: "hive"
+      
+  metastore:
+    name: "hivemetastore"
+    image: "minkens/hudi-hadoop_3.3.6-hive_4.2.0"    
+    tag: "latest"
+    port: 9083
+    
+  hiveserver:
+    name: "hiveserver"
+    image: "minkens/hudi-hadoop_3.3.6-hive_4.2.0" 
+    tag: "latest"
+    port: 10000
+
+# Spark
+spark:
+  master:
+    name: "sparkmaster"
+    image: "minkens/hudi-hadoop_3.3.6-hive_4.2.0-sparkmaster_3.5.3" 
+    tag: "latest"
+    ports:
+      web: 8080
+      master: 7077
+    env:
+      INIT_DAEMON_STEP: "setup_spark"
+      SPARK_LOCAL_IP: "datalake-sparkmaster"
+      SPARK_DRIVER_HOST: "datalake-sparkmaster"
+      
+  worker1:
+    name: "spark-worker-1"
+    image: "minkens/hudi-hadoop_3.3.6-hive_4.2.0-sparkworker_3.5.3"
+    tag: "latest"
+    ports:
+      web: 8081
+    env:                       
+      INIT_DAEMON_STEP: "setup_spark"
+      SPARK_LOCAL_IP: "spark-worker-1"
+
+# Trino
+trino:
+  coordinator:
+    image:
+      repository: "minkens/hudi-trino"
+      tag: "latest"
+      pullPolicy: "IfNotPresent"
+    ports:
+      http: 8080
+  worker:
+    image:
+      repository: "minkens/hudi-trino"
+      tag: "latest" 
+      pullPolicy: "IfNotPresent"
+    ports:
+      http: 8080
+
+# Kafka
+kafka:
+  broker:
+    name: "kafka"
+    image: "confluentinc/cp-kafka"
+    tag: "7.5.0"
+    port:
+      anywhere: 9092
+      internal: 29092
+    storageSize: "50Gi"
+  schemaRegistry:
+    name: "schema-registry"
+    image: "confluentinc/cp-schema-registry"
+    tag: "7.5.0"
+    port: 8081
+  ui:
+    name: "kafka-ui"
+    image: "provectuslabs/kafka-ui"
+    tag: "latest"
+    port: 8080
+
+# Traefik
+traefik:
+  enabled: true
+  image: "traefik"
+  tag: "v2.11"
+  port:
+    web: 80
+    dashboard: 8082

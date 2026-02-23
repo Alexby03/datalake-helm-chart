@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "datalake.fullname" . }}-trino-catalog
+  labels:
+    app.kubernetes.io/component: trino-catalog
+data:
+  hive.properties: |
+{{ .Files.Get "files/conf/trino/catalog/hive.properties" | indent 4 }}
+  hudi.properties: |
+{{ .Files.Get "files/conf/trino/catalog/hudi.properties" | indent 4 }}

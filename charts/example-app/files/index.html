@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ .Release.Name }}</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        @media (prefers-color-scheme: light) {
+            body {
+                background-color: #f0f0f0;
+                color: #222;
+            }
+        }
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #222;
+                color: #f0f0f0;
+            }
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        p {
+            font-size: 1.25rem;
+            margin: 0.5rem 0;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <h1>Hello from {{ .Release.Name }}!</h1>
+        <p>I am in the {{ .Release.Namespace }} namespace</p>
+        <p>Environment: {{ .Values.environment }}</p>
+    </div>
+</body>
+</html>
+

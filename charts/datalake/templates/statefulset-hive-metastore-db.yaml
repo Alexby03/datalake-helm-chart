@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "datalake.fullname" . }}-hive-metastore-db
+spec:
+  serviceName: {{ include "datalake.fullname" . }}-hive-metastore-db
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: hive-metastore-db
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: hive-metastore-db
+    spec:
+      containers:
+      - name: postgres
+        image: "{{ .Values.hive.metastoreDb.image }}"
+        env:
+        - name: POSTGRES_DB
+          value: "{{ .Values.hive.metastoreDb.env.POSTGRES_DB }}"
+        - name: POSTGRES_USER
+          value: "{{ .Values.hive.metastoreDb.env.POSTGRES_USER }}"
+        - name: POSTGRES_PASSWORD
+          value: "{{ .Values.hive.metastoreDb.env.POSTGRES_PASSWORD }}"
+        ports:
+        - name: postgresql
+          containerPort: 5432
+        volumeMounts:
+        - name: postgres-data
+          mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+  - metadata:
+      name: postgres-data
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: {{ .Values.hive.metastoreDb.storageSize | default "2Gi" | quote }}
+      storageClassName: {{ .Values.global.storageClass | default "standard" | quote }}

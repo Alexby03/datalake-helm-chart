@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "datalake.fullname" . }}-sparkmaster
+  labels:
+    app.kubernetes.io/component: spark-master
+spec:
+  type: ClusterIP
+  ports:
+    - name: web
+      port: {{ .Values.spark.master.ports.web }}
+      targetPort: web
+    - name: master
+      port: {{ .Values.spark.master.ports.master }}
+      targetPort: master
+  selector:
+    app.kubernetes.io/component: spark-master

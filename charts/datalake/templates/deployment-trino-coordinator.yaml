@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "datalake.fullname" . }}-trino-coordinator
+  labels:
+    app.kubernetes.io/component: trino-coordinator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: trino-coordinator
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: trino-coordinator
+    spec:
+      containers:
+      - name: trino
+        image: "{{ .Values.trino.coordinator.image.repository }}:{{ .Values.trino.coordinator.image.tag }}"
+        imagePullPolicy: {{ .Values.trino.coordinator.image.pullPolicy }}
+        ports:
+        - name: http
+          containerPort: {{ .Values.trino.coordinator.ports.http }}
+        volumeMounts:
+        - name: trino-config
+          mountPath: /etc/trino
+        - name: hadoop-config
+          mountPath: /etc/hadoop
+      volumes:
+      - name: trino-config
+        configMap:
+          name: {{ include "datalake.fullname" . }}-trino-catalog
+      - name: hadoop-config
+        configMap:
+          name: {{ include "datalake.fullname" . }}-hadoop-config

@@ -1,0 +1,24 @@
+# kind cluster configuration for local dev
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+
+nodes:
+  - role: control-plane
+    extraPortMappings:
+      # Map host 8080 -> container 30080 (HTTP)
+      - containerPort: 30080
+        hostPort: 80
+        protocol: TCP
+      # Map host 8443 -> container 30443 (HTTPS)
+      - containerPort: 30443
+        hostPort: 443
+        protocol: TCP
+ # - role: worker
+ # - role: worker
+
+# Containerd config patch for local registry
+#containerdConfigPatches:
+#  - |
+#    [plugins."io.containerd.grpc.v1.cri".registry.mirrors."localhost:5000"]
+#      endpoint = ["http://localhost:5000"]
+

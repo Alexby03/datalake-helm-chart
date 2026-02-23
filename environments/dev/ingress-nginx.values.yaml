@@ -1,0 +1,13 @@
+controller:
+  ingressClassResource:
+    default: true
+    config:
+      allow-snippet-annotations: "true"
+      proxy-buffering: "on"
+      proxy-buffers: 4 "512k"
+      proxy-buffer-size: "256k"
+  service:
+    nodePorts:
+      http: 30080  # HTTP NodePort (can be any unused port in the 30000-32767 range)
+      https: 30443  # HTTPS NodePort (can be any unused port in the 30000-32767 range)
+
