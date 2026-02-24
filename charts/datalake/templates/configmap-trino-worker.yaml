@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "datalake.fullname" . }}-trino-worker-config
+  labels:
+    app.kubernetes.io/component: trino-worker
+data:
+  node.properties: |
+    node.environment=datalake
+    node.data-dir=/data/trino
+  jvm.config: |
+    -server
+    -Xmx2G
+    -XX:+UseG1GC
+  config.properties: |
+    coordinator=false
+    http-server.http.port={{ .Values.trino.worker.ports.http }}
+    discovery.uri=http://{{ include "datalake.fullname" . }}-trino-coordinator:{{ .Values.trino.coordinator.ports.http }}
+    http-server.process-forwarded=true  
+  log.properties: |
+    io.trino=INFO

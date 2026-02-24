@@ -1,0 +1,41 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "datalake.fullname" . }}-ingress
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    # cert-manager.io/cluster-issuer: "letsencrypt-prod" uncomment when in cbhcloud????
+spec:
+  rules:
+  - host: trino.localtest.me
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ include "datalake.fullname" . }}-trino-coordinator
+            port:
+              number: {{ .Values.trino.coordinator.ports.http }}
+
+  - host: hadoop.localtest.me
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ include "datalake.fullname" . }}-namenode
+            port:
+              number: {{ .Values.hadoop.namenode.ports.web }}
+
+  - host: history.localtest.me
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ include "datalake.fullname" . }}-historyserver
+            port:
+              number: {{ .Values.hadoop.historyserver.ports.web }}

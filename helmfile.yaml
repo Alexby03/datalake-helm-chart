@@ -7,6 +7,8 @@ environments:
 repositories:
   - name: ingress-nginx
     url: https://kubernetes.github.io/ingress-nginx
+  - name: spark
+    url: https://apache.github.io/spark-kubernetes-operator
 
 releases:
 
@@ -16,6 +18,11 @@ releases:
     chart: ingress-nginx/ingress-nginx
     values:
       - environments/{{ .Environment.Name }}/ingress-nginx.values.yaml
+
+  - name: spark-operator       
+    namespace: datalake
+    createNamespace: true
+    chart: spark/spark-kubernetes-operator
 
   - name: example-app
     namespace: example-app
@@ -30,4 +37,3 @@ releases:
     chart: charts/datalake
     values:
       - environments/{{ .Environment.Name }}/values.yaml
-

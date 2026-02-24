@@ -1,11 +1,11 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ include "datalake.fullname" . }}-historyserver
+  name: {{ include "datalake.fullname" . }}-historyserver # Row 27, chmod, use fsGroup for cbhcloud
   labels:
     app.kubernetes.io/component: hadoop-historyserver
 spec:
-  serviceName: {{ include "datalake.fullname" . }}-historyserver  # References your existing service
+  serviceName: {{ include "datalake.fullname" . }}-historyserver  # References existing service
   replicas: 1
   selector:
     matchLabels:
@@ -18,11 +18,13 @@ spec:
       initContainers:
       - name: init-history-dir
         image: "{{ .Values.hadoop.historyserver.image.repository }}:{{ .Values.hadoop.historyserver.image.tag }}"
+        securityContext: 
+          runAsUser: 0
         command: ["/bin/bash", "-c"]
         args:
         - |
           mkdir -p /hadoop/yarn/timeline
-          chown -R historyserver:hadoop /hadoop/yarn/timeline
+          chmod -R 777 /hadoop/yarn/timeline
         volumeMounts:
         - name: hadoop-config
           mountPath: /etc/hadoop

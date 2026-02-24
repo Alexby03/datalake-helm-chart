@@ -10,5 +10,7 @@ run = "helmfile -e dev lint"
 [tasks.deploy-dev]
 depends = ["create-kind-cluster"]
 description = "Deploy helmfile to dev environment"
-run = "KUBECONFIG=.secrets/datalake-kubeconfig helmfile -e dev sync"
+run = "helmfile -e dev sync"
+env = { KUBECONFIG = ".secrets/datalake-kubeconfig" }
+
 

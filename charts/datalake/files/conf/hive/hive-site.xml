@@ -17,7 +17,7 @@
   </property>
   <property>
     <name>datanucleus.autoCreateSchema</name>
-    <value>false</value>
+    <value>true</value>
   </property>
   <property>
     <name>hive.metastore.uris</name>

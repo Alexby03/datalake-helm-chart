@@ -116,15 +116,15 @@ spark:
 trino:
   coordinator:
     image:
-      repository: "minkens/hudi-trino"
-      tag: "latest"
+      repository: "minkens/trino"
+      tag: "480-SNAPSHOT-amd64"
       pullPolicy: "IfNotPresent"
     ports:
       http: 8080
   worker:
     image:
-      repository: "minkens/hudi-trino"
-      tag: "latest" 
+      repository: "minkens/trino"
+      tag: "480-SNAPSHOT-amd64"
       pullPolicy: "IfNotPresent"
     ports:
       http: 8080
@@ -152,7 +152,7 @@ kafka:
 
 # Traefik
 traefik:
-  enabled: true
+  enabled: false
   image: "traefik"
   tag: "v2.11"
   port:

@@ -24,10 +24,15 @@ spec:
         volumeMounts:
         - name: trino-config
           mountPath: /etc/trino
+        - name: trino-catalog
+          mountPath: /etc/trino/catalog
         - name: hadoop-config
           mountPath: /etc/hadoop
       volumes:
       - name: trino-config
+        configMap:
+          name: {{ include "datalake.fullname" . }}-trino-worker-config
+      - name: trino-catalog
         configMap:
           name: {{ include "datalake.fullname" . }}-trino-catalog
       - name: hadoop-config
